@@ -1,0 +1,4 @@
+name = Art Collection
+description = Creates entity type Artwork 
+package = Drupal Entity Training
+core = 7.x
