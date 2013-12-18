@@ -1,0 +1,1 @@
+hook_entity_info
