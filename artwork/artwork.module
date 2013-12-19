@@ -15,16 +15,15 @@ include_once DRUPAL_ROOT . '/sites/all/modules/det/include/tools.inc';
  *
  * Called on module install or 'page and else cache' clear.
  */
-/*
 function artwork_entity_info() {
   det_trace_funct();
 
   $entity['artwork'] = array(
     'label' => t('Artwork'),
-    // 'controller class' => 'ArtworkController',
+    'controller class' => 'ArtworkController',
     'base table' => 'artwork',
     'revision table' => 'artwork_revision',
-    // defaults to TRUE so not needed to be specified 'static cache' => TRUE,
+    // Defaults to TRUE so not needed to be specified 'static cache' => TRUE,
     'uri callback' => 'artwork_callback_uri',
     'fieldable' => TRUE,
     'entity keys' => array(
@@ -49,24 +48,22 @@ function artwork_entity_info() {
     ),
   );
 
-  foreach(artwork_type() as $type => $info) {
+  foreach (_artwork_types() as $type => $info) {
     $entity['artwork']['bundles'][$type] = array(
       'label' => $info->name,
       'admin' => array(
         'path' => 'admin/structure/artworks/manage/%artwork_type',
         'bundle argument' => 4,
         'real path' => 'admin/structure/artworks/manage/' .
-          str_replace('_', '-', $type),
+        str_replace('_', '-', $type),
         'access arguments' => array('administer artworks'),
-       ),
+      ),
     );
   }
 
-  dpm($entity);
-
+  // dpm($entity);
   return $entity;
 }
-*/
 
 
 /**
@@ -86,11 +83,17 @@ function artwork_menu() {
 
   // This uses auto-loader wildcard!
   $items['admin/structure/artworks/manage/%artwork_type'] = array(
-    'title' => 'View artwork type',
-    // 'title callback' =>,
-    // 'title arguments' => array(4),
+    'title' => 'Manage artwork type',
+    'title callback' => 'artwork_tcb_artwork_type',
+    'title arguments' => array(4),
     'page callback' => 'artwork_pcb_manage_types',
     'page arguments' => array(4),
+    'access arguments' => array('administer artworks'),
+  );
+
+  $items['admin/structure/artworks/manage/%artwork_type/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
   return $items;
@@ -103,7 +106,7 @@ function artwork_menu() {
 function artwork_pcb_overview_types() {
   det_trace_funct();
 
-  foreach (artwork_artwork_types() as $type => $info) {
+  foreach (_artwork_types() as $type => $info) {
     $type_url = str_replace('_', '-', $type);
     $label = t('View @type', array('@type' => $info->name));
     $items[] = l($label, 'admin/structure/artworks/manage/' . $type_url);
@@ -124,10 +127,31 @@ function artwork_pcb_manage_types($artwork_type) {
 
 
 /**
+ * Auto-Loader Wildcard load function.
+ */
+function artwork_type_load($type) {
+  // det_trace_funct();
+
+  $types = _artwork_types();
+  $type = str_replace('-', '_', $type);
+  return isset($types[$type]) ? $types[$type] : FALSE;
+}
+
+
+/**
+ * Artworks page title callback.
+ */
+function artwork_tcb_artwork_type($type) {
+  // det_trace_funct();
+  return t('Manage @type', array('@type' => $type->name));
+}
+
+
+/**
  * Define bundles of artwork entity.
  */
 function _artwork_types() {
-  det_trace_funct();
+  // det_trace_funct();
 
   $types = &drupal_static(__FUNCTION__);
 
@@ -151,27 +175,13 @@ function _artwork_types() {
 
 
 /**
- * Auto-Loader Wildcard load function.
- */
-function artwork_type_load($type) {
-  det_trace_funct();
-
-  $types = _artwork_types();
-  $type = str_replace('-', '_', $type);
-  return isset($types[$type]) ? $types[$type] : FALSE;
-}
-
-
-/**
  * Implements callback_entity_info_uri().
  */
-/*
-function artwork_callback_uri($artwork) {
+function artwork_ccallback_uri($artwork) {
   det_trace_funct();
-  dpm($entity);
+  // dpm($artwork);
 
   return array(
-    'path' => 'artwork/' . $artwork.aid,
+    'path' => 'artwork/' . $artwork->aid,
   );
 }
-*/
