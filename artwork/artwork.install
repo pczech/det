@@ -2,14 +2,14 @@
 
 /**
  * @file
- * Install, uninstall hooks for artcol module
+ * Install, uninstall hooks for artwork module
  */
 
 
 /**
  * Implements hook_schema().
  */
-function artcol_schema() {
+function artwork_schema() {
   $schema['artwork'] = array(
     'description' => 'The base table for artworks.',
     'fields' => array(
