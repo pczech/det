@@ -2,3 +2,4 @@ name = Artwork
 description = Creates entity type Artwork 
 package = Drupal Entity Training
 core = 7.x
+files[] = artwork.controller.inc

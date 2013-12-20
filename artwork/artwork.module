@@ -79,9 +79,11 @@ function artwork_menu() {
     'description' => 'Manage artworks.',
     'page callback' => 'artwork_pcb_overview_types',
     'access arguments' => array('administer artworks'),
+    'file' => 'artwork.pages.inc',
   );
 
-  // This uses auto-loader wildcard!
+  // This uses auto-loader wildcard! It doesn't add menu links to menu tree.
+  // Compare with artwork/add menu, where the links in men tree are created.
   $items['admin/structure/artworks/manage/%artwork_type'] = array(
     'title' => 'Manage artwork type',
     'title callback' => 'artwork_tcb_artwork_type',
@@ -89,6 +91,7 @@ function artwork_menu() {
     'page callback' => 'artwork_pcb_manage_types',
     'page arguments' => array(4),
     'access arguments' => array('administer artworks'),
+    'file' => 'artwork.pages.inc',
   );
 
   $items['admin/structure/artworks/manage/%artwork_type/view'] = array(
@@ -96,33 +99,29 @@ function artwork_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
-  return $items;
-}
+  $items['artwork/add'] = array(
+    'title' => 'Add new artwork',
+    'page callback' => 'artwork_pcb_add_page',
+    'access arguments' => array('create artworks'),
+    'file' => 'artwork.pages.inc',
+    'weight' => 1,
+    'menu_name' => 'management',
+  );
 
-
-/**
- * Artworks page callback.
- */
-function artwork_pcb_overview_types() {
-  det_trace_funct();
-
-  foreach (_artwork_types() as $type => $info) {
-    $type_url = str_replace('_', '-', $type);
-    $label = t('View @type', array('@type' => $info->name));
-    $items[] = l($label, 'admin/structure/artworks/manage/' . $type_url);
+  foreach (_artwork_types() as $type) {
+    $type_url = str_replace('_', '-', $type->type);
+    $items['artwork/add/' . $type_url] = array(
+      'title' => $type->name,
+      'title callback' => 'check_plain',
+      'page callback' => 'artwork_pcb_add',
+      'page arguments' => array(2),
+      'access arguments' => array('create artworks'),
+      'file' => 'artwork.pages.inc',
+      'description' => $type->description,
+    );
   }
 
-  return theme('item_list', array('items' => $items));
-}
-
-
-/**
- * Artworks page callback.
- */
-function artwork_pcb_manage_types($artwork_type) {
-  det_trace_funct();
-
-  return $artwork_type->name . ': ' . $artwork_type->description;
+  return $items;
 }
 
 
@@ -177,7 +176,7 @@ function _artwork_types() {
 /**
  * Implements callback_entity_info_uri().
  */
-function artwork_ccallback_uri($artwork) {
+function artwork_callback_uri($artwork) {
   det_trace_funct();
   // dpm($artwork);
 
