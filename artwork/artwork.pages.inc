@@ -42,7 +42,7 @@ function artwork_pcb_add_page() {
   // dpm($item);
   // dpm($links);
 
-  foreach($links as $link) {
+  foreach ($links as $link) {
     $items[] = l($link['title'], $link['href'], $item['localized_options'])
       . ': ' . filter_xss_admin($link['description']);
   }
@@ -64,7 +64,223 @@ function artwork_pcb_add($type) {
     return MENU_NOT_FOUND;
   }
 
-  dpm(entity_get_controller('artwork'));
+  $artwork = entity_get_controller('artwork')->create($type);
+  drupal_set_title(t('Create @name',
+    array('@name' => $types[$type]->name)), PASS_THROUGH);
 
-  return t('Add artwork');
+  // Every artwork type has a unique dynamic name of the form, so that
+  // hook_form_alter implementations may uniquely target a specific artwork
+  // type, however all artwork types have the same form creation function.
+  // The mapping of various form IDs to common form builder function is
+  // realized in hook_forms.
+
+  // By default, when drupal_get_form() is called, the system will look for a
+  // function with the same name as the form ID, and use that function to build
+  // the form. If no such function is found, Drupal calls hook_forms.
+  return drupal_get_form('artwork_form_' . $type, $artwork);
+}
+
+
+/**
+ * Implements hook_forms().
+ *
+ * It is necessary to clean up the cache to activate the hook.
+ */
+function artwork_forms($form_id, $args) {
+  det_trace_funct();
+  // dpm($form_id);
+  // drupal_get_form is called with extra parameter $artwork object, which is
+  // passed to hook_forms in $args.
+  // dpm($args);
+
+  $forms = array();
+  if ($types = _artwork_types()) {
+    foreach (array_keys($types) as $type) {
+      // Warning: possible name collision with artwork bundle named 'any'
+      $forms['artwork_form_' . $type]['callback'] = 'artwork_form_any';
+    }
+  }
+
+  return $forms;
+}
+
+
+/**
+ * Creates form for "artwork_$type_form".
+ */
+function artwork_form_any($form, &$form_state, $artwork) {
+  det_trace_funct();
+  // dpm($form);
+  // dpm($form_state);
+  // dpm($artwork);
+
+  // $form['#id'] = 'artwork-form';
+
+  // Save the artwork object for later, in case we need it.
+  //$form['#artwork'] = $artwork;
+  $form_state['artwork'] = $artwork;
+
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => $artwork->title,
+    '#weight' => -5,
+    '#required' => TRUE,
+  );
+
+  $form['revision'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Create new revision'),
+    '#access' => user_access('administer artworks'),
+    '#default_value' => 0,
+  );
+
+  //buttons
+  $form['buttons'] = array(
+    '#weight' => 100,
+  );
+
+  if (1) {
+    $form['buttons']['save'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+      '#weight' => 5,
+      '#submit' => array('artwork_form_any_submit_save'),
+    );
+  }
+
+  if (!empty($artwork->aid)) {
+    $form['buttons']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete'),
+      '#access' => user_access('delete artworks'),
+      '#weight' => 15,
+      //'#submit' => array('artwork_form_any_submit_delete'),
+    );
+  }
+
+  $form['#validate'][] = 'artwork_form_any_validate';
+
+  // Field Attach API
+  // The field_attach_form() call is what passes our form off to the Field
+  // system so that any fields we've added to this artwork type can be added
+  //to the form.
+  field_attach_form('artwork', $artwork, $form, $form_state);
+
+  return $form;
+}
+
+
+/**
+ * For test.
+ *
+ * It is called if custom (in $form['#validate']) validation function is not
+ * specified. See $form['#validate'][] = 'artwork_form_any_validate'.
+ */
+function artwork_form_painting_validate() {
+  det_trace_funct();
+}
+
+
+/**
+ * For test.
+ *
+ * It is called if custom (in $form['#validate']) validation function is not
+ * specified. See $form['#validate'][] = 'artwork_form_validate'.
+ */
+function artwork_form_sculpture_validate() {
+  det_trace_funct();
+}
+
+
+/**
+ * Artwork form validation function.
+ */
+function artwork_form_any_validate($form, &$form_state) {
+  det_trace_funct();
+  // dpm($form);
+  // dpm($form_state);
+
+  // Field Attach API
+  // In this case any validation we'd do (checking for required fields) the
+  // Form API already does for us. All we need do is tell the Field system
+  // to do its own validation, by calling field_attach_form_validate.
+  $artwork = $form_state['artwork'];
+
+  // dpm($artwork);
+  // Fields attached to the entity artwork by Field Attach API, are added to
+  // $artwork object by field_attach_form_validate.
+  field_attach_form_validate('artwork', $artwork, $form, $form_state);
+  // dpm($artwork);
+}
+
+
+/**
+ * For test.
+ *
+ * It is called if custom (in $form['buttons']['save']['#submit']) submit
+ * function is not specified. See buttons definition in the form.
+ */
+function artwork_form_painting_submit() {
+  det_trace_funct();
+}
+
+
+/**
+ * For test.
+ *
+ * It is called if custom (in $form['buttons']['save']['#submit']) submit
+ * function is not specified. See buttons definition in the form.
+ */
+function artwork_form_sculpture_submit() {
+  det_trace_funct();
+}
+
+
+/**
+ * Submit function for 'save' button.
+ */
+function artwork_form_any_submit_save($form, &$form_state) {
+  det_trace_funct();
+  // dpm($form);
+  // dpm($form_state);
+
+  global $user;
+
+  $artwork = $form_state['artwork'];
+  if (empty($artwork->uid)) {
+    $artwork->uid = $user->uid;
+  }
+
+  // dpm($artwork)
+  // Fields attached to the entity by Field Attach API, are already present in
+  // $artwork object, so it is not needed to add them here.
+  $artwork->title = $form_state['values']['title'];
+  $artwork->revision = $form_state['values']['title'];
+
+  // Field Attach API
+  // Notify fields widgets. For what?..
+  field_attach_submit('artwork', $artwork, $form, $form_state);
+
+  // Save the artwork
+  _artwork_save($artwork);
+
+  drupal_set_message(t('Artwork saved'));
+
+  $form_state['redirect'] = 'artwork/' . $artwork->aid;
+}
+
+
+/**
+ * Submit function for 'delete' button.
+ */
+function artwork_form_any_submit_delete($form, &$form_state) {
+  det_trace_funct();
+  dpm($form);
+  dpm($form_state);
+}
+
+
+function _artwork_save($artwork) {
+  entity_get_controller('artwork')->save($artwork);
 }

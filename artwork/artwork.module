@@ -83,7 +83,7 @@ function artwork_menu() {
   );
 
   // This uses auto-loader wildcard! It doesn't add menu links to menu tree.
-  // Compare with artwork/add menu, where the links in men tree are created.
+  // Compare with artwork/add menu, where the links in menu tree are created.
   $items['admin/structure/artworks/manage/%artwork_type'] = array(
     'title' => 'Manage artwork type',
     'title callback' => 'artwork_tcb_artwork_type',
@@ -142,6 +142,7 @@ function artwork_type_load($type) {
  */
 function artwork_tcb_artwork_type($type) {
   // det_trace_funct();
+
   return t('Manage @type', array('@type' => $type->name));
 }
 
