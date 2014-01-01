@@ -86,7 +86,7 @@ function artwork_menu() {
   // This uses auto-loader wildcard! It doesn't add menu links to menu tree.
   // Compare with artwork/add menu, where the links in menu tree are created.
   $items['admin/structure/artworks/manage/%artwork_type'] = array(
-    'title' => 'Manage artwork type',
+    // 'title' => 'Manage artwork type',
     'title callback' => 'artwork_tcb_artwork_type',
     'title arguments' => array(4),
     'page callback' => 'artwork_pcb_manage_types',
@@ -122,12 +122,21 @@ function artwork_menu() {
     );
   }
 
+  $items['artwork/%artwork_id'] = array(
+    'title callback' => 'artwork_tcb_artwork_title',
+    'title arguments' => array(1),
+    'page callback' => 'artwork_pcb_view',
+    'page arguments' => array(''),
+    'access arguments' => array('view artworks'),
+    'file' => 'artwork.pages.inc',
+  );
+
   return $items;
 }
 
 
 /**
- * Auto-Loader Wildcard load function.
+ * Auto-Loader Wildcard load function for %artwork_type
  */
 function artwork_type_load($type) {
   // det_trace_funct();
@@ -139,12 +148,32 @@ function artwork_type_load($type) {
 
 
 /**
- * Artworks page title callback.
+ * Auto-Loader Wildcard load function for %artwork_id
+ */
+function artwork_id_load() {
+  det_trace_funct();
+
+  return 'Ala';
+}
+
+
+/**
+ * Artworks management page title callback.
  */
 function artwork_tcb_artwork_type($type) {
   // det_trace_funct();
 
   return t('Manage @type', array('@type' => $type->name));
+}
+
+
+/**
+ * Artwork page title callback.
+ */
+function artwork_tcb_artwork_title($artwork) {
+  det_trace_funct();
+  dpm($artwork);
+  return $artwork;
 }
 
 
@@ -158,4 +187,20 @@ function artwork_callback_uri($artwork) {
   return array(
     'path' => 'artwork/' . $artwork->aid,
   );
+}
+
+
+function _artwork_load($aid = NULL, $vid = NULL, reset = FALSE) {
+  TO BE CONTINUED...
+  $aids = isset($aid) : array($aid) : FALSE;
+  $conditions = isset($vid) : array('vid' => $vid)
+  $artwork = _artwork_multiple_load($aids, $conditions, reset);
+}
+
+
+/**
+ * Load artwork entities from DB. Wrapper for entity_load().
+ */
+function _artwork_multiple_load($aids = array(), $conditions = array(), reset = FALSE) {
+  return entity_load('artwork', $aids, $conditions, reset);
 }

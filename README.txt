@@ -6,6 +6,7 @@ hook_entity_info
 Entity
 ------
 entity_get_controller
+entity_load
 field_attach_delete_bundle
 field_attach_form
 field_attach_form_validate

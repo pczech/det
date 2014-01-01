@@ -82,6 +82,16 @@ function artwork_pcb_add($type) {
 
 
 /**
+ * View artwork callback.
+ */
+function artwork_pcb_view() {
+  det_trace_funct();
+
+  return 'Hello';
+}
+
+
+/**
  * Implements hook_forms().
  *
  * It is necessary to clean up the cache to activate the hook.
