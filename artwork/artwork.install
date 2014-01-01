@@ -5,6 +5,8 @@
  * Install, uninstall hooks for artwork module
  */
 
+include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'artwork') . '/artwork.types.inc';
+
 
 /**
  * Implements hook_schema().
@@ -81,7 +83,7 @@ function artwork_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-      'timestamp' => array(
+      'created' => array(
         'description' => 'The Unix timestamp when the artwork was created.',
         'type' => 'int',
         'not null' => TRUE,
@@ -98,4 +100,15 @@ function artwork_schema() {
   );
 
   return $schema;
+}
+
+
+/**
+ * Implements hook_uninstall().
+ */
+function artwork_uninstall() {
+  // Clear fields attached to artwork entities
+  foreach (array_keys(_artwork_types()) as $type) {
+    field_attach_delete_bundle('artwork', $type);
+  }
 }
