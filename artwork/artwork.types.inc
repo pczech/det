@@ -5,6 +5,8 @@
  * Artwork entity definition function.
  */
 
+// @ignore sniffer_commenting_inlinecomment_spacingafter:file
+
 
 /**
  * Define bundles of artwork entity.

@@ -7,6 +7,9 @@
  * Creates entity type 'Artwork'
  */
 
+// @ignore sniffer_commenting_inlinecomment_spacingafter:file
+
+
 include_once DRUPAL_ROOT . '/sites/all/modules/det/include/tools.inc';
 include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'artwork') . '/artwork.types.inc';
 
@@ -136,7 +139,7 @@ function artwork_menu() {
 
 
 /**
- * Auto-Loader Wildcard load function for %artwork_type
+ * Auto-Loader Wildcard load function for %artwork_type.
  */
 function artwork_type_load($type) {
   // det_trace_funct();
@@ -148,12 +151,24 @@ function artwork_type_load($type) {
 
 
 /**
- * Auto-Loader Wildcard load function for %artwork_id
+ * Auto-Loader Wildcard load function for %artwork_id.
+ *
+ * It returns artwork object, that is used then as parameter by
+ * 'title callback' and 'page callback'.
  */
-function artwork_id_load() {
-  det_trace_funct();
+function artwork_id_load($aid = NULL, $vid = NULL, $reset = FALSE) {
+  $aids = isset($aid) ? array($aid) : FALSE;
+  $conditions = isset($vid) ? array('vid' => $vid) : array();
+  $artwork = _artwork_multiple_load($aids, $conditions, $reset);
+  return $artwork ? reset($artwork) : FALSE;
+}
 
-  return 'Ala';
+
+/**
+ * Load artwork entities from DB. Wrapper for entity_load().
+ */
+function _artwork_multiple_load($aids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('artwork', $aids, $conditions, $reset);
 }
 
 
@@ -187,20 +202,4 @@ function artwork_callback_uri($artwork) {
   return array(
     'path' => 'artwork/' . $artwork->aid,
   );
-}
-
-
-function _artwork_load($aid = NULL, $vid = NULL, reset = FALSE) {
-  TO BE CONTINUED...
-  $aids = isset($aid) : array($aid) : FALSE;
-  $conditions = isset($vid) : array('vid' => $vid)
-  $artwork = _artwork_multiple_load($aids, $conditions, reset);
-}
-
-
-/**
- * Load artwork entities from DB. Wrapper for entity_load().
- */
-function _artwork_multiple_load($aids = array(), $conditions = array(), reset = FALSE) {
-  return entity_load('artwork', $aids, $conditions, reset);
 }

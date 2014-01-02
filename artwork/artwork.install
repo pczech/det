@@ -5,6 +5,9 @@
  * Install, uninstall hooks for artwork module
  */
 
+// @ignore sniffer_commenting_inlinecomment_spacingafter:file
+
+
 include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'artwork') . '/artwork.types.inc';
 
 
@@ -107,7 +110,7 @@ function artwork_schema() {
  * Implements hook_uninstall().
  */
 function artwork_uninstall() {
-  // Clear fields attached to artwork entities
+  // Clear fields attached to artwork entities.
   foreach (array_keys(_artwork_types()) as $type) {
     field_attach_delete_bundle('artwork', $type);
   }

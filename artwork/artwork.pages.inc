@@ -5,6 +5,9 @@
  * Artwork entity management pages' callbacks.
  */
 
+// @ignore sniffer_commenting_inlinecomment_spacingafter:file
+
+
 /**
  * Overview types page callback.
  */
@@ -127,7 +130,7 @@ function artwork_form_any($form, &$form_state, $artwork) {
   // $form['#id'] = 'artwork-form';
 
   // Save the artwork object for later, in case we need it.
-  //$form['#artwork'] = $artwork;
+  // $form['#artwork'] = $artwork;
   $form_state['artwork'] = $artwork;
 
   $form['title'] = array(
@@ -145,7 +148,7 @@ function artwork_form_any($form, &$form_state, $artwork) {
     '#default_value' => 0,
   );
 
-  //buttons
+  // Buttons.
   $form['buttons'] = array(
     '#weight' => 100,
   );
@@ -165,7 +168,7 @@ function artwork_form_any($form, &$form_state, $artwork) {
       '#value' => t('Delete'),
       '#access' => user_access('delete artworks'),
       '#weight' => 15,
-      //'#submit' => array('artwork_form_any_submit_delete'),
+      // '#submit' => array('artwork_form_any_submit_delete'),
     );
   }
 
@@ -174,7 +177,7 @@ function artwork_form_any($form, &$form_state, $artwork) {
   // Field Attach API
   // The field_attach_form() call is what passes our form off to the Field
   // system so that any fields we've added to this artwork type can be added
-  //to the form.
+  // to the form.
   field_attach_form('artwork', $artwork, $form, $form_state);
 
   return $form;
@@ -273,7 +276,7 @@ function artwork_form_any_submit_save($form, &$form_state) {
   // Notify fields widgets. For what?..
   field_attach_submit('artwork', $artwork, $form, $form_state);
 
-  // Save the artwork
+  // Save the artwork.
   _artwork_save($artwork);
 
   drupal_set_message(t('Artwork saved'));

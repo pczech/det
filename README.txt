@@ -32,3 +32,4 @@ PHP
 ---
 str_replace
 array_keys
+reset

@@ -5,6 +5,9 @@
  * Artwork entity controller class.
  */
 
+// @ignore sniffer_commenting_inlinecomment_spacingafter:file
+
+
 /**
  * Controller class for artworks.
  *
@@ -14,18 +17,18 @@ class ArtworkController extends DrupalDefaultEntityController {
   /**
    * Create the artwork entity object.
    */
-  function create($type = '') {
+  public function create($type = '') {
     return (object) array(
       'aid' => '',
       'type' => $type,
       'title' => '',
-      );
+    );
   }
 
   /**
    * Save the artwork entity object.
    */
-  function save($artwork) {
+  public function save($artwork) {
     det_trace_funct();
     // dpm($artwork);
 
@@ -58,7 +61,7 @@ class ArtworkController extends DrupalDefaultEntityController {
 
       // If this is a new artwork...
       if ($is_new_artwork) {
-        // Save the new artwork. Revision settings are ignored.
+        // Save the new artwork.
         // Save a new record in artwork table according to the schema:
         // aid - new serial value
         // vid - null ($artwork->vid doesn't exist as no revision data is ready)
@@ -71,24 +74,24 @@ class ArtworkController extends DrupalDefaultEntityController {
         // dpm($artwork);
 
         // Save the initial revision.
-        $this->save_revision($artwork, $user->uid);
+        $this->saveRevision($artwork, $user->uid);
       }
       else {
         // TODO
-        // Save the updated artwork
+        // Save the updated artwork.
       }
 
-      //If the revision is new, store vid to artwork entity in DB
+      // If the revision is new, store vid to artwork entity in DB.
       db_update('artwork')
         ->fields(array('vid' => $artwork->vid))
         ->condition('aid', $artwork->aid)
         ->execute();
 
-      // Save fields attached to the entity
+      // Save fields attached to the entity.
       field_attach_insert('artwork', $artwork);
 
       // Invoke hook_entity_insert in all enabled modules that implement it,
-      // include arguments to pass to the hook - $entity, $type
+      // include arguments to pass to the hook - $entity, $type.
       module_invoke_all('entity_insert', $artwork, 'artwork');
 
       // Ignore slave server temporarily to give time for the saved order to
@@ -108,7 +111,7 @@ class ArtworkController extends DrupalDefaultEntityController {
   /**
    * Save revision for artwork entity.
    */
-  private function save_revision($artwork, $uid, $update = FALSE) {
+  protected function saveRevision($artwork, $uid, $update = FALSE) {
     det_trace_funct();
 
     $temp_uid = $artwork->uid;
@@ -118,13 +121,14 @@ class ArtworkController extends DrupalDefaultEntityController {
       // TODO
     }
     else {
+      // Save a new record in artwork_revision table according to the schema:
       // aid - $artwork->aid
       // vid - new serial value
       // title - $artwork->title
       // created - $artwork->created
       // HINT. The values not provided in $artwork (vid) will be populated in
       // $artwork and in the database with the default values from the schema,
-      // as well as a single serial (auto-increment) field
+      // as well as a single serial (auto-increment) field.
       drupal_write_record('artwork_revision', $artwork);
     }
 
