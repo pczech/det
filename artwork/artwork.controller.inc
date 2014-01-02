@@ -41,7 +41,7 @@ class ArtworkController extends DrupalDefaultEntityController {
       $is_new_artwork = empty($artwork->aid);
 
       if ($is_new_artwork) {
-        $artwork->uid = $user->uid;
+        // $artwork->uid = $user->uid;
         $artwork->created = REQUEST_TIME;
       }
       $artwork->changed = REQUEST_TIME;
@@ -75,23 +75,43 @@ class ArtworkController extends DrupalDefaultEntityController {
 
         // Save the initial revision.
         $this->saveRevision($artwork, $user->uid);
+
+        // Update revision reference in the artwork record.
+        $this->updateRevRef($artwork);
+
+        // Save attached fields in DB.
+        field_attach_insert('artwork', 'artwork');
+
+        // Invoke hook_entity_insert in all enabled modules that implement it.
+        // Include arguments to pass to the hook - $entity, $type.
+        module_invoke_all('entity_insert', $artwork, 'artwork');
       }
       else {
-        // @todo Save the updated artwork.
+        // Update existing record, indicated by 'aid' key.
+        // aid - given record
+        // vid - $artwork->vid (will be updated)
+        // type - $artwork->type ('painting' for example)
+        // title - $artwork->title
+        // created - $artwork->created ?
+        // changed - $artwork->changed ?
+        drupal_write_record('artwork', $artwork, 'aid');
+
+        // TEMPORARY: write new revision always
+        // vid is primary key, so unset it for the new revision and then a new
+        // serial value will be used.
+        unset($artwork->vid);
+        $this->saveRevision($artwork, $user->uid);
+
+        // Update revision reference in the artwork record.
+        $this->updateRevRef($artwork);
+
+        // Update attached fields in DB.
+        field_attach_update('artwork', 'artwork');
+
+        // Invoke hook_entity_update in all enabled modules that implement it.
+        // Include arguments to pass to the hook - $entity, $type.
+        module_invoke_all('entity_update', $artwork, 'artwork');
       }
-
-      // If the revision is new, store vid to artwork entity in DB.
-      db_update('artwork')
-        ->fields(array('vid' => $artwork->vid))
-        ->condition('aid', $artwork->aid)
-        ->execute();
-
-      // Save fields attached to the entity.
-      field_attach_insert('artwork', $artwork);
-
-      // Invoke hook_entity_insert in all enabled modules that implement it,
-      // include arguments to pass to the hook - $entity, $type.
-      module_invoke_all('entity_insert', $artwork, 'artwork');
 
       // Ignore slave server temporarily to give time for the saved order to
       // be propagated to the slave.
@@ -108,13 +128,26 @@ class ArtworkController extends DrupalDefaultEntityController {
   }
 
   /**
+   * Assign the new artwork revision to artwork record in DB.
+   *
+   * Revision ID (vid) must be present before handling attached fields as
+   * thay as attached to given revision.
+   */
+  protected function updateRevRef($artwork) {
+    db_update('artwork')
+      ->fields(array('vid' => $artwork->vid))
+      ->condition('aid', $artwork->aid)
+      ->execute();
+  }
+
+  /**
    * Save revision for artwork entity.
    */
   protected function saveRevision($artwork, $uid, $update = FALSE) {
     det_trace_funct();
 
-    $temp_uid = $artwork->uid;
-    $artwork->uid = $uid;
+    // $temp_uid = $artwork->uid;
+    // $artwork->uid = $uid;
 
     if ($update) {
       // @todo Save the updated revision.
@@ -131,6 +164,6 @@ class ArtworkController extends DrupalDefaultEntityController {
       drupal_write_record('artwork_revision', $artwork);
     }
 
-    $artwork->uid = $temp_uid;
+    // $artwork->uid = $temp_uid;
   }
 }

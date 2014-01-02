@@ -305,7 +305,7 @@ function artwork_form_any_submit_save($form, &$form_state) {
   // Fields attached to the entity by Field Attach API, are already present in
   // $artwork object, so it is not needed to add them here.
   $artwork->title = $form_state['values']['title'];
-  $artwork->revision = $form_state['values']['title'];
+  $artwork->revision = $form_state['values']['revision'];
 
   // Field Attach API
   // Notify fields widgets. For what?..

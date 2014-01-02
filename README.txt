@@ -15,6 +15,7 @@ field_attach_insert
 field_attach_prepare_view
 field_attach_presave
 field_attach_submit
+field_attach_update
 field_attach_view
 
 Other
