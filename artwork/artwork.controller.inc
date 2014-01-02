@@ -45,7 +45,7 @@ class ArtworkController extends DrupalDefaultEntityController {
         $artwork->created = REQUEST_TIME;
       }
       $artwork->changed = REQUEST_TIME;
-      // $artwork->revision_timestamp = REQUEST_TIME; ?
+      $artwork->timestamp = REQUEST_TIME;
 
       // $update_artwork = TRUE;  //???
 
@@ -61,9 +61,8 @@ class ArtworkController extends DrupalDefaultEntityController {
 
       // If this is a new artwork...
       if ($is_new_artwork) {
-        // Save the new artwork.
-        // Save a new record in artwork table according to the schema:
-        // aid - new serial value
+        // Save the new artwork record according to the schema:
+        // aid - null (a new serial value will be set automatically)
         // vid - null ($artwork->vid doesn't exist as no revision data is ready)
         // type - $artwork->type ('painting' for example)
         // title - $artwork->title
@@ -80,7 +79,7 @@ class ArtworkController extends DrupalDefaultEntityController {
         $this->updateRevRef($artwork);
 
         // Save attached fields in DB.
-        field_attach_insert('artwork', 'artwork');
+        field_attach_insert('artwork', $artwork);
 
         // Invoke hook_entity_insert in all enabled modules that implement it.
         // Include arguments to pass to the hook - $entity, $type.
@@ -92,21 +91,26 @@ class ArtworkController extends DrupalDefaultEntityController {
         // vid - $artwork->vid (will be updated)
         // type - $artwork->type ('painting' for example)
         // title - $artwork->title
-        // created - $artwork->created ?
-        // changed - $artwork->changed ?
+        // created - null
+        // changed - $artwork->changed
+        // dpm($artwork);
         drupal_write_record('artwork', $artwork, 'aid');
 
-        // TEMPORARY: write new revision always
-        // vid is primary key, so unset it for the new revision and then a new
-        // serial value will be used.
-        unset($artwork->vid);
-        $this->saveRevision($artwork, $user->uid);
+        if (!empty($artwork->revision)) {
+          // Save new revision. vid is primary key, so unset it and then a new
+          // serial value will be set automatically to the new record.
+          unset($artwork->vid);
+          $this->saveRevision($artwork, $user->uid);
+        }
+        else {
+          $this->saveRevision($artwork, $user->uid, FALSE);
+        }
 
         // Update revision reference in the artwork record.
         $this->updateRevRef($artwork);
 
         // Update attached fields in DB.
-        field_attach_update('artwork', 'artwork');
+        field_attach_update('artwork', $artwork);
 
         // Invoke hook_entity_update in all enabled modules that implement it.
         // Include arguments to pass to the hook - $entity, $type.
@@ -143,25 +147,32 @@ class ArtworkController extends DrupalDefaultEntityController {
   /**
    * Save revision for artwork entity.
    */
-  protected function saveRevision($artwork, $uid, $update = FALSE) {
+  protected function saveRevision($artwork, $uid, $insert = TRUE) {
     det_trace_funct();
 
     // $temp_uid = $artwork->uid;
     // $artwork->uid = $uid;
 
-    if ($update) {
-      // @todo Save the updated revision.
-    }
-    else {
+    if ($insert) {
       // Save a new record in artwork_revision table according to the schema:
       // aid - $artwork->aid
-      // vid - new serial value
+      // vid - null (new serial value will be set automatically)
       // title - $artwork->title
-      // created - $artwork->created
+      // timestamp - $artwork->timestamp
       // HINT. The values not provided in $artwork (vid) will be populated in
       // $artwork and in the database with the default values from the schema,
       // as well as a single serial (auto-increment) field.
       drupal_write_record('artwork_revision', $artwork);
+      // dpm($artwork);
+    }
+    else {
+      // Update existing record:
+      // aid - $artwork->aid
+      // vid - $artwork->vid
+      // title - $artwork->title
+      // timestamp - $artwork->timestamp
+      dpm($artwork);
+      drupal_write_record('artwork_revision', $artwork, 'vid');
     }
 
     // $artwork->uid = $temp_uid;

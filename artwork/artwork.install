@@ -86,8 +86,8 @@ function artwork_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-      'created' => array(
-        'description' => 'The Unix timestamp when the artwork was created.',
+      'timestamp' => array(
+        'description' => 'The Unix timestamp when this version was created.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
