@@ -77,8 +77,7 @@ class ArtworkController extends DrupalDefaultEntityController {
         $this->saveRevision($artwork, $user->uid);
       }
       else {
-        // TODO
-        // Save the updated artwork.
+        // @todo Save the updated artwork.
       }
 
       // If the revision is new, store vid to artwork entity in DB.
@@ -118,7 +117,7 @@ class ArtworkController extends DrupalDefaultEntityController {
     $artwork->uid = $uid;
 
     if ($update) {
-      // TODO
+      // @todo Save the updated revision.
     }
     else {
       // Save a new record in artwork_revision table according to the schema:

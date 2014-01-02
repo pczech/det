@@ -125,12 +125,33 @@ function artwork_menu() {
     );
   }
 
+  // In order to make the tabs View, Edit visible, you should add and set
+  // 'access arguments' parameter for the tabs.
   $items['artwork/%artwork_id'] = array(
     'title callback' => 'artwork_tcb_artwork_title',
+    // The argument 1 is $artwork object returned by auto-loader wildcard.
     'title arguments' => array(1),
     'page callback' => 'artwork_pcb_view',
-    'page arguments' => array(''),
+    'page arguments' => array(1),
     'access arguments' => array('view artworks'),
+    'type' => MENU_CALLBACK,
+    'file' => 'artwork.pages.inc',
+  );
+
+  $items['artwork/%artwork_id/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $items['artwork/%artwork_id/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'artwork_pcb_edit',
+    'page arguments' => array(1),
+    'access arguments' => array('update artworks'),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'weight' => 0,
     'file' => 'artwork.pages.inc',
   );
 
@@ -157,10 +178,16 @@ function artwork_type_load($type) {
  * 'title callback' and 'page callback'.
  */
 function artwork_id_load($aid = NULL, $vid = NULL, $reset = FALSE) {
+  // det_trace_funct();
+  // dpm($aid);
+  // dpm($vid);
+  // dpm($reset);
+
   $aids = isset($aid) ? array($aid) : FALSE;
   $conditions = isset($vid) ? array('vid' => $vid) : array();
-  $artwork = _artwork_multiple_load($aids, $conditions, $reset);
-  return $artwork ? reset($artwork) : FALSE;
+  $artworks = _artwork_multiple_load($aids, $conditions, $reset);
+  // Return 1st $artwork object.
+  return $artworks ? reset($artworks) : FALSE;
 }
 
 
@@ -186,9 +213,9 @@ function artwork_tcb_artwork_type($type) {
  * Artwork page title callback.
  */
 function artwork_tcb_artwork_title($artwork) {
-  det_trace_funct();
-  dpm($artwork);
-  return $artwork;
+  // det_trace_funct();
+  // dpm($artwork);
+  return $artwork->title;
 }
 
 
@@ -196,7 +223,7 @@ function artwork_tcb_artwork_title($artwork) {
  * Implements callback_entity_info_uri().
  */
 function artwork_callback_uri($artwork) {
-  det_trace_funct();
+  // det_trace_funct();
   // dpm($artwork);
 
   return array(

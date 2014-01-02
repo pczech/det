@@ -7,12 +7,15 @@ Entity
 ------
 entity_get_controller
 entity_load
+entity_prepare_view
 field_attach_delete_bundle
 field_attach_form
 field_attach_form_validate
 field_attach_insert
+field_attach_prepare_view
 field_attach_presave
 field_attach_submit
+field_attach_view
 
 Other
 -------

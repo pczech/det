@@ -87,10 +87,45 @@ function artwork_pcb_add($type) {
 /**
  * View artwork callback.
  */
-function artwork_pcb_view() {
+function artwork_pcb_view($artwork, $view_mode = 'full') {
   det_trace_funct();
+  // dpm($artwork);
 
-  return 'Hello';
+  if ($view_mode == 'teaser') {
+    // @todo handle teaser mode.
+    dpm($view_mode);
+  }
+
+  // Prepare field data prior to display.
+  // INFO: $artwork is reference to object, so it can be modified if passed to
+  // a function.
+  field_attach_prepare_view('artwork', array($artwork->aid => $artwork), $view_mode);
+  // dpm($artwork);
+
+  // Invoke hook_entity_prepare_view() to allow other modules to alter the
+  // objects during ENTITY_build_content() or ENTITY_view_multiple() phases of
+  // rendering.
+  entity_prepare_view('artwork', array($artwork->aid => $artwork));
+  // dpm($artwork);
+
+  // Create renderable array for the attached fields and return it.
+  return field_attach_view('artwork', $artwork, $view_mode);
+}
+
+
+/**
+ * Edit artwork callback.
+ */
+function artwork_pcb_edit($artwork) {
+  det_trace_funct();
+  // dpm($artwork);
+
+  $types = _artwork_types();
+  drupal_set_title(t('<em>Edit @type</em> @title', array(
+    '@type' => $types[$artwork->type]->name,
+    '@title' => $artwork->title)), PASS_THROUGH);
+
+  return drupal_get_form('artwork_form_' . $artwork->type, $artwork);
 }
 
 
