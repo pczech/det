@@ -23,6 +23,7 @@ Other
 db_ignore_slave
 db_transaction
 drupal_static
+drupal_get_destination
 filter_xss_admin
 system_admin_menu_block
 watchdog_exception

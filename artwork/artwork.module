@@ -155,6 +155,19 @@ function artwork_menu() {
     'file' => 'artwork.pages.inc',
   );
 
+  $items['artwork/%artwork_id/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    // 2nd argument for drupal_get_form is $artwork object returned by
+    // artwork_id_load()
+    'page arguments' => array('artwork_form_any_delete_cfm', 1),
+    'access arguments' => array('delete artworks'),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_INLINE,
+    'weight' => 0,
+    'file' => 'artwork.pages.inc',
+  );
+
   return $items;
 }
 

@@ -156,4 +156,9 @@ class ArtworkController extends DrupalDefaultEntityController {
       ->condition('aid', $artwork->aid)
       ->execute();
   }
+
+
+  public function delete($aid) {
+    det_trace_funct();
+  }
 }

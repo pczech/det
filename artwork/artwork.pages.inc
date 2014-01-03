@@ -165,7 +165,6 @@ function artwork_form_any($form, &$form_state, $artwork) {
   // $form['#id'] = 'artwork-form';
 
   // Save the artwork object for later, in case we need it.
-  // $form['#artwork'] = $artwork;
   $form_state['artwork'] = $artwork;
 
   $form['title'] = array(
@@ -203,7 +202,7 @@ function artwork_form_any($form, &$form_state, $artwork) {
       '#value' => t('Delete'),
       '#access' => user_access('delete artworks'),
       '#weight' => 15,
-      // '#submit' => array('artwork_form_any_submit_delete'),
+      '#submit' => array('artwork_form_any_submit_delete'),
     );
   }
 
@@ -319,8 +318,64 @@ function artwork_form_any_submit_save($form, &$form_state) {
  */
 function artwork_form_any_submit_delete($form, &$form_state) {
   det_trace_funct();
-  dpm($form);
-  dpm($form_state);
+  // dpm($form);
+  // dpm($form_state);
+
+  $artwork = $form_state['artwork'];
+
+  // Redirect to delete page.
+  $form_state['redirect'] = 'artwork/' . $artwork->aid . '/delete';
+}
+
+
+/**
+ * Artwork delete confirm form constructor.
+ */
+function artwork_form_any_delete_cfm($form, &$form_state, $artwork) {
+  det_trace_funct();
+
+  $form['aid'] = array(
+    '#type' => 'value',
+    '#value' => $artwork->aid,
+  );
+
+  $form = confirm_form($form,
+      t('Are you sure you want to delete %title?', array('%title' => $artwork->title)),
+      'artwork/' . $artwork->aid);
+
+  // dpm($form);
+  return $form;
+}
+
+
+/**
+ * Submit function for deleting 'confirm' button.
+ */
+function artwork_form_any_delete_cfm_submit($form, &$form_state) {
+  det_trace_funct();
+  // dpm($form);
+  // dpm($form_state);
+
+  // 'confirm' parameter is added by confirm_form
+  if ($form_state['values']['confirm']) {
+    $artwork = artwork_id_load($form_state['values']['aid']);
+    _artwork_delete($form_state['values']['aid']);
+
+    watchdog('artwork', '@type: deleted %title', array(
+      '@type' => $artwork->type, '%title' => $artwork->title));
+
+    $types = _artwork_types();
+    drupal_set_message(t('@type %title has been deleted.'), array(
+      '@type' => $types[$artwork->type]->name,
+      '%title' => $artwork->title));
+  }
+
+}
+
+
+function _artwork_load($aid) {
+  // @TODO: entity_id_load will wrap this function.
+  // use EntityFieldQuery instead of $conditions
 }
 
 
@@ -329,4 +384,11 @@ function artwork_form_any_submit_delete($form, &$form_state) {
  */
 function _artwork_save($artwork) {
   entity_get_controller('artwork')->save($artwork);
+}
+
+/**
+ * Delete entity from DB.
+ */
+function _artwork_delete($aids) {
+  entity_get_controller('artwork')->delete($artwork);
 }
