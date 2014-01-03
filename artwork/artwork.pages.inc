@@ -296,12 +296,6 @@ function artwork_form_any_submit_save($form, &$form_state) {
   $artwork = $form_state['artwork'];
   // dpm($artwork)
 
-  // Why is uid added here, and not in ArtworkController::save()?
-  // For field_attach_submit?
-  // if (empty($artwork->uid)) {
-  //   $artwork->uid = $user->uid;
-  // }
-
   // Fields attached to the entity by Field Attach API, are already present in
   // $artwork object, so it is not needed to add them here.
   $artwork->title = $form_state['values']['title'];
