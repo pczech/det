@@ -130,30 +130,6 @@ function artwork_pcb_edit($artwork) {
 
 
 /**
- * Implements hook_forms().
- *
- * It is necessary to clean up the cache to activate the hook.
- */
-function artwork_forms($form_id, $args) {
-  det_trace_funct();
-  // dpm($form_id);
-  // drupal_get_form is called with extra parameter $artwork object, which is
-  // passed to hook_forms in $args.
-  // dpm($args);
-
-  $forms = array();
-  if ($types = _artwork_types()) {
-    foreach (array_keys($types) as $type) {
-      // Warning: possible name collision with artwork bundle named 'any'
-      $forms['artwork_form_' . $type]['callback'] = 'artwork_form_any';
-    }
-  }
-
-  return $forms;
-}
-
-
-/**
  * Creates form for "artwork_$type_form".
  */
 function artwork_form_any($form, &$form_state, $artwork) {
@@ -365,30 +341,9 @@ function artwork_form_any_delete_cfm_submit($form, &$form_state) {
       '@type' => $artwork->type, '%title' => $artwork->title));
 
     $types = _artwork_types();
-    drupal_set_message(t('@type %title has been deleted.'), array(
+    drupal_set_message(t('@type %title has been deleted.', array(
       '@type' => $types[$artwork->type]->name,
-      '%title' => $artwork->title));
+      '%title' => $artwork->title)));
   }
-
-}
-
-
-function _artwork_load($aid) {
-  // @TODO: entity_id_load will wrap this function.
-  // use EntityFieldQuery instead of $conditions
-}
-
-
-/**
- * Save entity to DB.
- */
-function _artwork_save($artwork) {
-  entity_get_controller('artwork')->save($artwork);
-}
-
-/**
- * Delete entity from DB.
- */
-function _artwork_delete($aids) {
-  entity_get_controller('artwork')->delete($artwork);
+  $form_state['redirect'] = '<front>';
 }

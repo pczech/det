@@ -173,6 +173,30 @@ function artwork_menu() {
 
 
 /**
+ * Implements hook_forms().
+ *
+ * It is necessary to clean up the cache to activate the hook.
+ */
+function artwork_forms($form_id, $args) {
+  det_trace_funct();
+  // dpm($form_id);
+  // drupal_get_form is called with extra parameter $artwork object, which is
+  // passed to hook_forms in $args.
+  // dpm($args);
+
+  $forms = array();
+  if ($types = _artwork_types()) {
+    foreach (array_keys($types) as $type) {
+      // Warning: possible name collision with artwork bundle named 'any'
+      $forms['artwork_form_' . $type]['callback'] = 'artwork_form_any';
+    }
+  }
+
+  return $forms;
+}
+
+
+/**
  * Auto-Loader Wildcard load function for %artwork_type.
  */
 function artwork_type_load($type) {
@@ -190,25 +214,11 @@ function artwork_type_load($type) {
  * It returns artwork object, that is used then as parameter by
  * 'title callback' and 'page callback'.
  */
-function artwork_id_load($aid = NULL, $vid = NULL, $reset = FALSE) {
+function artwork_id_load($aid) {
   // det_trace_funct();
   // dpm($aid);
-  // dpm($vid);
-  // dpm($reset);
 
-  $aids = isset($aid) ? array($aid) : FALSE;
-  $conditions = isset($vid) ? array('vid' => $vid) : array();
-  $artworks = _artwork_multiple_load($aids, $conditions, $reset);
-  // Return 1st $artwork object.
-  return $artworks ? reset($artworks) : FALSE;
-}
-
-
-/**
- * Load artwork entities from DB. Wrapper for entity_load().
- */
-function _artwork_multiple_load($aids = array(), $conditions = array(), $reset = FALSE) {
-  return entity_load('artwork', $aids, $conditions, $reset);
+  return _artwork_load($aid);
 }
 
 
@@ -228,6 +238,7 @@ function artwork_tcb_artwork_type($type) {
 function artwork_tcb_artwork_title($artwork) {
   // det_trace_funct();
   // dpm($artwork);
+
   return $artwork->title;
 }
 
@@ -242,4 +253,30 @@ function artwork_callback_uri($artwork) {
   return array(
     'path' => 'artwork/' . $artwork->aid,
   );
+}
+
+/**
+ * Load artwork entity record.
+ */
+function _artwork_load($aid = NULL) {
+  $aids = isset($aid) ? array($aid) : FALSE;
+  // @TODO use EntityFieldQuery instead of $conditions
+  $artworks = entity_load('artwork', $aids);
+  return $artworks ? reset($artworks) : FALSE;
+}
+
+
+/**
+ * Save artwork entity record.
+ */
+function _artwork_save($artwork) {
+  entity_get_controller('artwork')->save($artwork);
+}
+
+
+/**
+ * Delete artwork entity record.
+ */
+function _artwork_delete($aid) {
+  entity_get_controller('artwork')->delete($aid);
 }

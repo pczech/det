@@ -15,7 +15,7 @@
  */
 class ArtworkController extends DrupalDefaultEntityController {
   /**
-   * Create the artwork entity object.
+   * Create empty artwork entity object.
    */
   public function create($type = '') {
     return (object) array(
@@ -26,7 +26,7 @@ class ArtworkController extends DrupalDefaultEntityController {
   }
 
   /**
-   * Save the artwork entity object.
+   * Save the artwork entity record.
    */
   public function save($artwork) {
     det_trace_funct();
@@ -157,8 +157,50 @@ class ArtworkController extends DrupalDefaultEntityController {
       ->execute();
   }
 
-
+  /**
+   * Delete the artwork entity record.
+   */
   public function delete($aid) {
     det_trace_funct();
+
+    if (empty($aid)) {
+      // Nothing to delete.
+      return TRUE;
+    }
+
+    // Handle multiple artworks.
+    $aids = array($aid);
+    $transaction = db_transaction();
+
+    try {
+      db_delete('artwork')
+        ->condition('aid', $aids, 'IN')
+        ->execute();
+
+      db_delete('artwork_revision')
+        ->condition('aid', $aids, 'IN')
+        ->execute();
+
+      $artworks = $this->load($aids);
+      foreach ($artworks as $artwork) {
+        field_attach_delete('artwork', $artwork);
+      }
+
+      // Invoke hook_entity_delete in all enabled modules that implement it.
+      // Include arguments to pass to the hook - $entity, $type.
+      module_invoke_all('entity_delete', $artwork, 'artwork');
+      db_ignore_slave();
+
+      // Clear the page and block and artwork caches.
+      cache_clear_all();
+      $this->resetCache();
+      return TRUE;
+    }
+    catch (Exception $e) {
+      dpm($e);
+      $transaction->rollback();
+      watchdog_exception('artwork', $e);
+      return FALSE;
+    }
   }
 }

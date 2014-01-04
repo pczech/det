@@ -8,6 +8,7 @@ Entity
 entity_get_controller
 entity_load
 entity_prepare_view
+field_attach_delete
 field_attach_delete_bundle
 field_attach_form
 field_attach_form_validate
@@ -20,6 +21,7 @@ field_attach_view
 
 Other
 -------
+cache_clear_all
 db_ignore_slave
 db_transaction
 drupal_static
