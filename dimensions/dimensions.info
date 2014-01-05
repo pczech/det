@@ -1,0 +1,4 @@
+name = Dimensions field
+description = A Field offering height, width, and depth
+package = Drupal Entity Training
+core = 7.x

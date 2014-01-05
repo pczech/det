@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * @file
+ * Play with Field API again.
+ *
+ * Again Field API example, now from Drupal 7 Module Development book
+ * in context of Entities.
+ */
+
+// @ignore sniffer_commenting_inlinecomment_spacingafter:file
+
+
+include_once DRUPAL_ROOT . '/sites/all/modules/det/include/tools.inc';
+
+
+/**
+ * Implements hook_field_info().
+ */
+function dimensions_field_info() {
+  det_trace_funct();
+
+  return array(
+    'dimensions' => array(
+      'label' => t('Dimensions'),
+      'description' => t('This field stores height, width, and depth.'),
+    ),
+  );
+}
+
+function dimensions_field_widget_info() {
+  det_trace_funct();
+
+  return array(
+    'dimensions_simple' => array(
+      'label' => t('Separate text fields'),
+      'field types' => array('dimensions'),
+    ),
+  );
+}
